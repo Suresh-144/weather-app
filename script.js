@@ -1,58 +1,32 @@
-// Declaring the variables
-let lon;
-let lat;
+function getWeather(){
 
-let temperature = document.querySelector(".temp");
-let summary = document.querySelector(".summary");
-let loc = document.querySelector(".location");
-let icon = document.querySelector(".icon");
+if(navigator.geolocation){
 
-const kelvin = 273;
+navigator.geolocation.getCurrentPosition(async function(position){
 
-window.addEventListener("load", () => {
+let lat = position.coords.latitude;
+let lon = position.coords.longitude;
 
-  if (navigator.geolocation) {
+let url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
 
-    navigator.geolocation.getCurrentPosition((position) => {
+let response = await fetch(url);
+let data = await response.json();
 
-      console.log(position);
+document.getElementById("location").innerText =
+"Latitude: " + lat.toFixed(2) + " , Longitude: " + lon.toFixed(2);
 
-      lon = position.coords.longitude;
-      lat = position.coords.latitude;
+document.getElementById("temp").innerText =
+data.current_weather.temperature + "°C";
 
-      // API Key
-      const api = "6d055e39ee237af35ca066f35474e9df";
-
-      // Correct API URL
-      const base = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${api}`;
-
-      // Calling API
-      fetch(base)
-        .then((response) => response.json())
-        .then((data) => {
-
-          console.log(data);
-
-          temperature.textContent =
-            Math.floor(data.main.temp - kelvin) + "°C";
-
-          summary.textContent =
-            data.weather[0].description;
-
-          loc.textContent =
-            data.name + ", " + data.sys.country;
-
-          let icon1 = data.weather[0].icon;
-
-          icon.innerHTML =
-            `<img src="icons/${icon1}.svg" style="height:10rem"/>`;
-
-        });
-
-    });
-
-  } else {
-    alert("Geolocation is not supported by this browser.");
-  }
+document.getElementById("desc").innerText =
+"Wind Speed: " + data.current_weather.windspeed + " km/h";
 
 });
+
+}else{
+
+alert("Geolocation not supported");
+
+}
+
+}
